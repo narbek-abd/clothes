@@ -41,7 +41,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $path = $request->file('image')->store('categories');
+        $path = $request->file('image')->store('products');
 
         Product::create([
             'name' => $request->name,
@@ -87,7 +87,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        $path = $request->file('image')->store('categories');
+        $path = $request->file('image')->store('products');
         Storage::delete($product->image);
 
         $product->update([

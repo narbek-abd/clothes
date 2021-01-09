@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-use App\Http\Controllers\MainController;
-use App\Http\Controllers\BasketController;
-use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Person\OrderController as personOrderController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\BasketController;
+use App\Http\Controllers\MainController;
+use App\Http\Controllers\Person\OrderController as personOrderController;
+use App\Http\Controllers\ResetController;
+use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\ProductController;
 */
 
 Route::get('/', [MainController::class, 'index'])->name('index');
+Route::get('reset', [ResetController::class, 'reset'])->name('reset');
 
 Route::get('/categories', [MainController::class, 'categories'])->name('categories');
 Route::get('/category/{cat_name}', [MainController::class, 'category'])->name('category');
