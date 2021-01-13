@@ -2,17 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductsFilterRequest;
+use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\Product;
-use App\Models\Category;
 
 class MainController extends Controller
 {
-	public function index(Request $request)
+	public function index(ProductsFilterRequest $request)
 	{
-		$produts = Product::all();
-		return view('index', ['produsts' => $produts]);
+		$products = Product::query();
+
+		if (isset ($request->price_from) ) {
+			$products->where('price', '>=', $request->price_from);
+		} 
+
+		if (isset ($request->price_to) ) {
+			$products->where('price', '<=', $request->price_to);
+		} 
+
+		foreach (['new', 'hit', 'recommend'] as $field) {
+			if (isset ($request->$field) ) {
+				$products->where($field, '=', 1);
+			} 
+		}
+
+		$products = $products->paginate(3)->withPath("?" . $request->getQueryString());
+		return view('index', ['products' => $products]);
 	}
 
 	public function categories()

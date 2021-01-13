@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Product;
 use App\Models\Category;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\ProductRequest;
+use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-
 
 class ProductController extends Controller
 {
@@ -19,7 +19,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::get();
-        return view('admin.products.index', ['products' => $products]);
+        return view('admin.products.index', compact('products'));
     }
 
     /**
@@ -30,7 +30,7 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::get();
-        return view('admin.products.form', ['categories' => $categories]);        
+        return view('admin.products.form', compact('categories'));
     }
 
     /**
@@ -39,72 +39,74 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        $path = $request->file('image')->store('products');
+        $params = $request->all();
 
-        Product::create([
-            'name' => $request->name,
-            'code' => $request->code,
-            'description' => $request->description,
-            'image' => $path,
-            'category_id' => $request->category_id,
-            'price' => $request->price,
-        ]);
-        
+        unset($params['image']);
+        if ($request->has('image')) {
+            $params['image'] = $request->file('image')->store('products');
+        }
+
+        Product::create($params);
         return redirect()->route('products.index');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
     public function show(Product $product)
     {
-        return view('admin.products.show', ['product' => $product]);        
+        return view('admin.products.show', compact('product'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
     public function edit(Product $product)
     {
         $categories = Category::get();
-        return view('admin.products.form', ['product' => $product, 'categories' => $categories]);
+        return view('admin.products.form', compact('product', 'categories'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function update(ProductRequest $request, Product $product)
     {
-        $path = $request->file('image')->store('products');
-        Storage::delete($product->image);
+        $params = $request->all();
+        unset($params['image']);
+        if ($request->has('image')) {
+            Storage::delete($product->image);
+            $params['image'] = $request->file('image')->store('products');
+        }
 
-        $product->update([
-          'name' => $request->name,
-          'code' => $request->code,
-          'description' => $request->description,
-          'image' => $path,
-          'category_id' => $request->category_id,
-          'price' => $request->price,
-      ]);
+        foreach (['new', 'hit', 'recommend'] as $fieldName) {
+            if (!isset($params[$fieldName])) {
+                $params[$fieldName] = 0;
+            }
+        }
+
+//        dd($params);
+
+        $product->update($params);
         return redirect()->route('products.index');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
     public function destroy(Product $product)

@@ -2,6 +2,19 @@
   <div class="thumbnail">
     <img src="{{ Storage::url($product->image) }}" alt="iPhone X 64GB">
     <div class="caption">
+       <div class="labels">
+            @if($product->isNew())
+                <span class="badge badge-success">Новинка</span>
+            @endif
+
+            @if($product->isRecommend())
+                <span class="badge badge-warning">Рекомендуем</span>
+            @endif
+
+            @if($product->isHit())
+                <span class="badge badge-danger">Хит продаж!</span>
+            @endif
+        </div>
       <h3>{{ $product->name }}</h3>
       <p>{{ $product->price }} руб.</p>
       <p>
